@@ -184,6 +184,9 @@ datetimeCalendar12.setValue('2024-12-25 14:30');</code></pre>
             target: '#calendar-date',
             enableDateTime: false,
             startDay: 1,
+            dayNames: ['Нед', 'Пон', 'Втор', 'Сря', 'Чет', 'Пет', 'Съб'],
+            monthsNames: ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни',
+            'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'],
             onChange: (value) => {
                 console.log('Selected date:', value);
                 document.getElementById('date-value').textContent = value || 'None';

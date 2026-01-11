@@ -22,6 +22,8 @@ class LumiCalendar {
         this.selectedValue = null;
         // Track AM/PM state for 12-hour format (internal, not shown to user)
         this.currentIsPM = false;
+        this.viewMode = 'days'; // 'days' | 'month-year'
+        this.tempDate = null;  // used while selecting month/year
         // Initialize the calendar
         this.init();
     }
@@ -70,8 +72,11 @@ class LumiCalendar {
         calendarWrapper.appendChild(header);
         
         // Calendar grid
-        const grid = this.createGrid();
-        calendarWrapper.appendChild(grid);
+        if (this.viewMode === 'month-year') {
+            calendarWrapper.appendChild(this.createMonthYearView());
+        } else {
+            calendarWrapper.appendChild(this.createGrid());
+        }        
         
         // Time picker (only if datetime mode is enabled)
         if (this.enableDateTime) {
@@ -81,6 +86,84 @@ class LumiCalendar {
         
         container.appendChild(calendarWrapper);
     }
+
+    createMonthYearView() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'month-year-view';
+    
+        // Year selector
+        const yearControl = document.createElement('div');
+        yearControl.className = 'year-control';
+    
+        const prev = document.createElement('button');
+        prev.textContent = '−';
+        prev.onclick = () => {
+            this.tempDate.setFullYear(this.tempDate.getFullYear() - 1);
+            yearLabel.textContent = this.tempDate.getFullYear();
+        };        
+    
+        const yearLabel = document.createElement('span');
+        yearLabel.textContent = this.tempDate.getFullYear();
+    
+        const next = document.createElement('button');
+        next.textContent = '+';
+        next.onclick = () => {
+            this.tempDate.setFullYear(this.tempDate.getFullYear() + 1);
+            yearLabel.textContent = this.tempDate.getFullYear();
+        };        
+    
+        yearControl.append(prev, yearLabel, next);
+    
+        // Month grid
+        const monthGrid = document.createElement('div');
+        monthGrid.className = 'month-grid';
+    
+        this.monthsNames.forEach((month, index) => {
+            const m = document.createElement('div');
+            m.className = 'month-item';
+            m.textContent = month.substring(0, 3);
+    
+            if (index === this.tempDate.getMonth()) {
+                m.classList.add('active');
+            }
+
+            m.onclick = () => {
+                this.tempDate.setMonth(index);
+            
+                // update active state visually
+                monthGrid.querySelectorAll('.month-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                m.classList.add('active');
+            };            
+    
+            monthGrid.appendChild(m);
+        });
+    
+        // Actions
+        const actions = document.createElement('div');
+        actions.className = 'month-year-actions';
+    
+        const cancel = document.createElement('button');
+        cancel.textContent = 'Cancel';
+        cancel.onclick = () => {
+            this.viewMode = 'days';
+            this.render();
+        };
+    
+        const apply = document.createElement('button');
+        apply.textContent = 'Apply';
+        apply.onclick = () => {
+            this.currentDate = new Date(this.tempDate);
+            this.viewMode = 'days';
+            this.render();
+        };
+    
+        actions.append(cancel, apply);
+    
+        wrapper.append(yearControl, monthGrid, actions);
+        return wrapper;
+    }    
     
     /**
      * Create calendar header with month/year and navigation buttons
@@ -99,6 +182,20 @@ class LumiCalendar {
         const monthYear = document.createElement('div');
         monthYear.className = 'month-year';
         monthYear.textContent = this.getMonthYearString();
+
+        // When in month/year selection mode
+        if (this.viewMode === 'month-year') {
+            monthYear.textContent = this.getMonthYearString();
+        }
+
+        monthYear.style.cursor = 'pointer';
+        monthYear.addEventListener('click', () => {
+            if (this.viewMode === 'month-year') return;
+        
+            this.viewMode = 'month-year';
+            this.tempDate = new Date(this.currentDate);
+            this.render();
+        });
         
         // Next month button
         const nextBtn = document.createElement('button');
@@ -109,10 +206,6 @@ class LumiCalendar {
         header.appendChild(prevBtn);
         header.appendChild(monthYear);
         header.appendChild(nextBtn);
-
-        // Click to open month/year selector
-        monthYear.style.cursor = 'pointer';
-        monthYear.addEventListener('click', () => this.openMonthYearSelector());
         
         return header;
     }
@@ -189,80 +282,6 @@ class LumiCalendar {
             if (hour12 === 12) return 0;
             return hour12;
         }
-    }
-
-    /**
-     * Open month/year selector popup (polished version)
-     */
-    openMonthYearSelector() {
-        // Remove existing selector if any
-        const existing = document.querySelector(`${this.target} .month-year-selector`);
-        if (existing) existing.remove();
-
-        const container = document.querySelector(this.target);
-        const monthYearDiv = container.querySelector('.month-year');
-
-        const selector = document.createElement('div');
-        selector.className = 'month-year-selector';
-
-        // Month options
-        const monthContainer = document.createElement('div');
-        monthContainer.className = 'month-selector';
-        this.monthsNames.forEach((month, index) => {
-            const monthDiv = document.createElement('div');
-            monthDiv.className = 'month-option';
-            monthDiv.textContent = month;
-            monthDiv.addEventListener('click', () => {
-                this.currentDate.setMonth(index);
-                selector.remove();
-                this.render();
-            });
-            monthContainer.appendChild(monthDiv);
-        });
-
-        // Year options (currentYear ± 10)
-        const yearContainer = document.createElement('div');
-        yearContainer.className = 'year-selector';
-        // Year options (10 years before and after current real year)
-        const now = new Date();
-        const startYear = now.getFullYear() - 10;
-        const endYear = now.getFullYear() + 10;
-
-        for (let y = startYear; y <= endYear; y++) {
-            const yearDiv = document.createElement('div');
-            yearDiv.className = 'year-option';
-            yearDiv.textContent = y;
-            yearDiv.addEventListener('click', () => {
-                this.currentDate.setFullYear(y);
-                selector.remove();
-                this.render();
-            });
-            yearContainer.appendChild(yearDiv);
-        }
-
-
-        selector.appendChild(monthContainer);
-        selector.appendChild(yearContainer);
-
-        // Append to container
-        container.appendChild(selector);
-
-        // Position the popup below the month-year div
-        const rect = monthYearDiv.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        selector.style.top = `${monthYearDiv.offsetTop + monthYearDiv.offsetHeight}px`;
-        selector.style.left = `${monthYearDiv.offsetLeft}px`;
-
-        // Close when clicking outside
-        const outsideClickListener = (e) => {
-            if (!selector.contains(e.target) && e.target !== monthYearDiv) {
-                selector.remove();
-                document.removeEventListener('click', outsideClickListener);
-            }
-        };
-        setTimeout(() => { // slight delay to avoid immediate removal on click
-            document.addEventListener('click', outsideClickListener);
-        }, 0);
     }
     
     /**
