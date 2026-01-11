@@ -152,8 +152,8 @@
 
 /* Time Picker Styles */
 .time-picker {
-    margin-top: 20px;
-    padding-top: 20px;
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 2px solid var(--color-border);
     animation: fadeIn 0.3s ease;
 }

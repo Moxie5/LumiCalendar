@@ -63,3 +63,14 @@ const dateCalendar = new LumiCalendar({
 });
 </script>
 ```
+
+### 3. Set a value
+
+```html
+<script>
+calendar.setValue('2026-01-15');  // YYYY-MM-DD
+// Set value for datetime
+calendar.setValue('2026-01-15 14:30');  // YYYY-MM-DD HH:mm (24-hour)
+//For 12-hour format, it will automatically convert internally and display AM/PM correctly.
+</script>
+```
