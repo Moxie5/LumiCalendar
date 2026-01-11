@@ -1,25 +1,45 @@
 # LumiCalendar
 
-A simple, **dependency-free JavaScript calendar component**.  
-Supports both **date-only** and **datetime selection** modes.  
+**LumiCalendar** is a simple, dependency-free JavaScript calendar component that supports both **date-only** and **datetime** selection modes. It is lightweight, fully customizable, and easy to integrate.
 
 ---
 
 ## Features
 
-- Select single dates or full date + time (datetime)  
-- 12-hour or 24-hour time format  
-- Start week on Sunday or Monday (configurable)  
-- Display custom day and month names  
-- Highlight today’s date  
-- Select, update, and programmatically set dates  
-- Fully customizable through simple configuration  
+- Date-only or datetime selection
+- 12-hour or 24-hour time format
+- Customizable day names and month names
+- Supports programmatic setting and getting of selected date
+- Simple navigation between months
+- Highlights today’s date and selected date
 
 ---
 
-## Installation / Usage
+## Installation
 
-### 1. Include via `<script>` tag (browser usage)
+You can include LumiCalendar via ES module import or via script tag.
+
+### 1. Using ES Module
+
+```javascript
+import LumiCalendar from './path/to/LumiCalendar.js';
+
+const calendar = new LumiCalendar({
+    target: '#calendar',        // Selector for the container element
+    enableDateTime: true,       // Enable date + time selection
+    hourFormat: '12',           // '12' or '24'
+    startDay: 1,                // 0 = Sunday, 1 = Monday
+    dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    monthsNames: ['January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'],
+    initialDate: '2026-01-11', // Optional: initial displayed date
+    onChange: (value) => {
+        console.log('Selected value:', value);
+    }
+});
+```
+
+### 2. Include via `<script>` tag (browser usage)
 
 ```html
 <script src="LumiCalendar.js"></script>
@@ -37,18 +57,4 @@ const dateCalendar = new LumiCalendar({
     }
 });
 </script>
-```
-### 2. Include via ES module
-```javascropt
-import LumiCalendar from './LumiCalendar.js';
-
-const datetimeCalendar = new LumiCalendar({
-    target: '#calendar-datetime',
-    enableDateTime: true,
-    hourFormat: '12',
-    onChange: (value) => {
-        console.log('Selected datetime:', value);
-        document.getElementById('datetime-value').textContent = value || 'None';
-    }
-});
 ```
