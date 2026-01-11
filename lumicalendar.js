@@ -355,6 +355,40 @@ class LumiCalendar {
         timeControls.appendChild(hoursWrapper);
         timeControls.appendChild(minutesWrapper);
 
+        if (this.hourFormat === '12') {
+            const ampmWrapper = document.createElement('div');
+            ampmWrapper.className = 'time-input-wrapper';
+
+            const ampmLabel = document.createElement('label');
+            ampmLabel.textContent = 'AM/PM:';
+
+            const ampmSelect = document.createElement('select');
+            ampmSelect.className = 'ampm-select';
+
+            const optionAM = document.createElement('option');
+            optionAM.value = 'AM';
+            optionAM.textContent = 'AM';
+            const optionPM = document.createElement('option');
+            optionPM.value = 'PM';
+            optionPM.textContent = 'PM';
+
+            ampmSelect.append(optionAM, optionPM);
+
+            // Set initial value
+            ampmSelect.value = this.currentIsPM ? 'PM' : 'AM';
+
+            // Update currentIsPM when user changes selection
+            ampmSelect.addEventListener('change', () => {
+                this.currentIsPM = ampmSelect.value === 'PM';
+                this.updateDateTime();
+            });
+
+            ampmWrapper.append(ampmLabel, ampmSelect);
+            timeControls.appendChild(ampmWrapper);
+
+            this.ampmSelect = ampmSelect; // save reference for later
+        }
+
         timePicker.appendChild(timeControls);
         
         // Store references for later use
@@ -520,6 +554,10 @@ class LumiCalendar {
                     // Convert to display format
                     if (this.hourFormat === '12') {
                         this.hoursInput.value = this.to12Hour(hours);
+                        // Sync AM/PM dropdown
+                        if (this.ampmSelect) {
+                            this.ampmSelect.value = this.currentIsPM ? 'PM' : 'AM';
+                        }
                     } else {
                         this.hoursInput.value = hours;
                     }

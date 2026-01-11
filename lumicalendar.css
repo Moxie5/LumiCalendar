@@ -158,6 +158,25 @@
     animation: fadeIn 0.3s ease;
 }
 
+/* AM/PM selector in time picker */
+.ampm-select {
+    width: 70px;
+    padding: 8px 6px;
+    border: 2px solid var(--color-time-input-border);
+    border-radius: 6px;
+    font-size: 16px;
+    text-align: center;
+    background: var(--color-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ampm-select:focus {
+    outline: none;
+    border-color: var(--color-time-input-focus-border);
+    box-shadow: 0 0 0 3px var(--color-time-input-focus-shadow);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
