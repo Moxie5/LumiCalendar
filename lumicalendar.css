@@ -34,7 +34,7 @@
 
 .custom-calendar {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    max-width: 400px;
+    max-width: 300px;
     margin: 0 auto;
     background: var(--color-card-bg);
     border-radius: 8px;
@@ -217,8 +217,8 @@
 }
 
 .time-input {
-    width: 70px;
-    padding: 8px 12px;
+    width: 45px;
+    padding: 8px 10px;
     border: 2px solid var(--color-time-input-border);
     border-radius: 6px;
     font-size: 16px;
@@ -306,7 +306,8 @@
 }
 
 .month-item {
-    padding: 10px;
+    font-size: 14px;
+    padding: 8px 0px;
     text-align: center;
     border-radius: 6px;
     cursor: pointer;
@@ -342,6 +343,52 @@
     color: #fff;
 }
 
+.year-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 5px 0;
+    scroll-behavior: smooth;
+}
+
+.year-scroll-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.year-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+.year-item {
+    min-width: 50px;
+    padding: 6px 10px;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fafafa;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.year-item.active {
+    background: var(--color-selected-bg);
+    color: var(--color-selected-text);
+    font-weight: 600;
+}
+
+.year-item.active:hover {
+    background: var(--color-selected-bg);
+    color: var(--color-selected-text);
+    font-weight: 600;
+}
+
+.year-item:hover {
+    background: var(--color-selected-bg);
+    color: var(--color-bg);
+    font-weight: 600;
+}
+
 /* Responsive adjustments */
 @media (max-width: 480px) {
     .custom-calendar {
@@ -367,7 +414,7 @@
     }
     
     .time-input {
-        width: 60px;
+        width: 45px;
         font-size: 14px;
     }
 }

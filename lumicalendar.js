@@ -95,24 +95,68 @@ class LumiCalendar {
         const yearControl = document.createElement('div');
         yearControl.className = 'year-control';
     
-        const prev = document.createElement('button');
-        prev.textContent = '−';
-        prev.onclick = () => {
-            this.tempDate.setFullYear(this.tempDate.getFullYear() - 1);
-            yearLabel.textContent = this.tempDate.getFullYear();
-        };        
+        // const prev = document.createElement('button');
+        // prev.textContent = '−';
+        // prev.onclick = () => {
+        //     this.tempDate.setFullYear(this.tempDate.getFullYear() - 1);
+        //     yearLabel.textContent = this.tempDate.getFullYear();
+        // };        
     
-        const yearLabel = document.createElement('span');
-        yearLabel.textContent = this.tempDate.getFullYear();
+        // const yearLabel = document.createElement('span');
+        // yearLabel.textContent = this.tempDate.getFullYear();
     
-        const next = document.createElement('button');
-        next.textContent = '+';
-        next.onclick = () => {
-            this.tempDate.setFullYear(this.tempDate.getFullYear() + 1);
-            yearLabel.textContent = this.tempDate.getFullYear();
-        };        
+        // const next = document.createElement('button');
+        // next.textContent = '+';
+        // next.onclick = () => {
+        //     this.tempDate.setFullYear(this.tempDate.getFullYear() + 1);
+        //     yearLabel.textContent = this.tempDate.getFullYear();
+        // };        
     
-        yearControl.append(prev, yearLabel, next);
+        // yearControl.append(prev, yearLabel, next);
+
+        // Scrollable year container
+        const yearContainer = document.createElement('div');
+        yearContainer.className = 'year-scroll-container';
+
+        // Show 10 years around current year
+        const currentYear = this.tempDate.getFullYear();
+        const startYear = currentYear - 5;
+        const endYear = currentYear + 5;
+
+        for (let y = startYear; y <= endYear; y++) {
+            const yearItem = document.createElement('div');
+            yearItem.className = 'year-item';
+            yearItem.textContent = y;
+
+            if (y === currentYear) {
+                yearItem.classList.add('active');
+            }
+
+            yearItem.onclick = () => {
+                this.tempDate.setFullYear(y);
+
+                // update active state
+                yearContainer.querySelectorAll('.year-item').forEach(el => el.classList.remove('active'));
+                yearItem.classList.add('active');
+            };
+
+            yearContainer.appendChild(yearItem);
+        }
+
+        // Append the scrollable container to yearControl
+        yearControl.appendChild(yearContainer);
+
+        // Scroll the active year into the center
+        setTimeout(() => {
+            const activeYear = yearContainer.querySelector('.year-item.active');
+            if (activeYear) {
+                activeYear.scrollIntoView({
+                    behavior: 'smooth', 
+                    block: 'nearest',   // vertical: don’t scroll
+                    inline: 'center'    // horizontal: center in container
+                });
+            }
+        }, 0);        
     
         // Month grid
         const monthGrid = document.createElement('div');
@@ -714,3 +758,24 @@ if (typeof window !== 'undefined') {
 }
 
 // export default LumiCalendar;
+
+// (function (global, factory) {
+//     if (typeof module === "object" && typeof module.exports === "object") {
+//         // Node/CommonJS or bundler environment
+//         module.exports = factory();
+//     } else if (typeof define === "function" && define.amd) {
+//         // AMD
+//         define([], factory);
+//     } else {
+//         // Browser global
+//         global.LumiCalendar = factory();
+//     }
+// }(typeof window !== "undefined" ? window : this, function () {
+
+//     // Your full LumiCalendar class code goes here
+//     class LumiCalendar {
+//         // ...everything inside your class...
+//     }
+
+//     return LumiCalendar;
+// }));
