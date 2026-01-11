@@ -57,7 +57,7 @@
 }
 
 .month-year {
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--color-text);
     flex: 1;
@@ -68,8 +68,8 @@
     background: var(--color-btn-bg);
     border: none;
     border-radius: 6px;
-    width: 36px;
-    height: 36px;
+    width: 25px;
+    height: 25px;
     cursor: pointer;
     font-size: 16px;
     color: var(--color-text-muted);
@@ -77,6 +77,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.nav-btn.prev-btn.flipped {
+    transform: scaleX(-1);
 }
 
 .nav-btn:hover {
@@ -402,7 +406,7 @@
     }
     
     .month-year {
-        font-size: 14px;
+        font-size: 10px;
     }
     
     .day-cell {

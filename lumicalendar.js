@@ -218,8 +218,8 @@ class LumiCalendar {
         
         // Previous month button
         const prevBtn = document.createElement('button');
-        prevBtn.className = 'nav-btn prev-btn';
-        prevBtn.innerHTML = '&larr;';
+        prevBtn.className = 'nav-btn prev-btn flipped';
+        prevBtn.innerHTML = '&#10132;';
         prevBtn.addEventListener('click', () => this.navigateMonth(-1));
         
         // Month/Year display
@@ -244,7 +244,7 @@ class LumiCalendar {
         // Next month button
         const nextBtn = document.createElement('button');
         nextBtn.className = 'nav-btn next-btn';
-        nextBtn.innerHTML = '&rarr;';
+        nextBtn.innerHTML = '&#10132;';
         nextBtn.addEventListener('click', () => this.navigateMonth(1));
         
         header.appendChild(prevBtn);
