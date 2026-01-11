@@ -32,7 +32,6 @@ const calendar = new LumiCalendar({
     dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     monthsNames: ['January', 'February', 'March', 'April', 'May', 'June',
                   'July', 'August', 'September', 'October', 'November', 'December'],
-    initialDate: '2026-01-11', // Optional: initial displayed date
     onChange: (value) => {
         console.log('Selected value:', value);
     }
