@@ -20,10 +20,28 @@ class LumiCalendar {
             'July', 'August', 'September', 'October', 'November', 'December'];
         // Selected value (date or datetime)
         this.selectedValue = null;
+        // Range selection properties
+        this.rangeSelection = config.rangeSelection || false; // enable range mode
+        this.startDate = null;  // first selected date
+        this.endDate = null;    // last selected date
+        if (this.rangeSelection) {
+            if (config.startDate) this.startDate = new Date(config.startDate);
+            if (config.endDate) this.endDate = new Date(config.endDate);
+        }
+        // Datetime range support
+        this.startTime = { hours: 12, minutes: 0 };
+        this.endTime = { hours: 12, minutes: 0 };
+        this.activeRangePart = 'start'; // 'start' | 'end'
+        this.minDate = config.minDate ? new Date(config.minDate) : null; //everything before this is disabled
         // Track AM/PM state for 12-hour format (internal, not shown to user)
         this.currentIsPM = false;
         this.viewMode = 'days'; // 'days' | 'month-year'
         this.tempDate = null;  // used while selecting month/year
+        // Array of disabled ranges [{ start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }]
+        this.disabledRanges = (config.disabledDates || []).map(range => ({
+            start: new Date(range.start),
+            end: new Date(range.end)
+        }));
         // Initialize the calendar
         this.init();
     }
@@ -273,9 +291,20 @@ class LumiCalendar {
         // Get days for current month
         const days = this.getDaysInMonth();
         
-        days.forEach(day => {
+        days.forEach(day => {        
             const dayCell = document.createElement('div');
             dayCell.className = 'day-cell';
+
+            if (day) {
+                // Disabled check
+                if ((this.minDate && day < this.minDate) || this.isDateDisabled(day)) {
+                    dayCell.classList.add('disabled');
+                    dayCell.style.pointerEvents = 'none';
+                    dayCell.style.opacity = '0.4';
+                } else {
+                    dayCell.addEventListener('click', () => this.selectDate(day));
+                }
+            }                      
             
             if (day === null) {
                 // Empty cell for days outside current month
@@ -286,9 +315,9 @@ class LumiCalendar {
                 // Store date value for easy updates
                 dayCell.dataset.dateValue = this.formatDate(day);
                 
-                // Check if this day is selected
-                if (this.isSelected(day)) {
-                    dayCell.className += ' selected';
+                // Selection is handled exclusively by updateRangeCells()
+                if (!this.rangeSelection && this.isSelected(day)) {
+                    dayCell.classList.add('selected');
                 }
                 
                 // Check if this day is today
@@ -338,6 +367,53 @@ class LumiCalendar {
         // Show time picker if we have a selected value
         const shouldShow = this.selectedValue !== null;
         timePicker.style.display = shouldShow ? 'block' : 'none';
+
+        // Range time selector (only for range + datetime)
+        let rangeToggle = null;
+
+        if (this.enableDateTime && this.rangeSelection) {
+            rangeToggle = document.createElement('div');
+            rangeToggle.className = 'range-time-toggle';
+
+            const startBtn = document.createElement('button');
+            this.rangeStartBtn = startBtn;
+            const clockIcon = '🕒';
+            startBtn.innerHTML = `${clockIcon} <span class="range-date-label"></span>`;
+
+            startBtn.classList.add('active');
+
+            const endBtn = document.createElement('button');
+            this.rangeEndBtn = endBtn;
+            endBtn.innerHTML = `${clockIcon} <span class="range-date-label"></span>`;
+
+            startBtn.onclick = () => {
+                this.setActiveRangePart('start');
+            };
+
+            endBtn.onclick = () => {
+                if (!this.endDate) return;
+                this.setActiveRangePart('end');
+            };
+
+            rangeToggle.append(startBtn, endBtn);
+
+            const updateRangeLabels = () => {
+                const format = (d) =>
+                    d ? d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }) : '--';
+            
+                startBtn.querySelector('.range-date-label').textContent =
+                    format(this.startDate);
+            
+                endBtn.querySelector('.range-date-label').textContent =
+                    format(this.endDate);
+            };
+            
+            // Store reference so we can update later
+            this.updateRangeLabels = updateRangeLabels;
+            
+            // Initial update
+            updateRangeLabels();            
+        }
         
         const timeControls = document.createElement('div');
         timeControls.className = 'time-controls';
@@ -434,6 +510,10 @@ class LumiCalendar {
         }
 
         timePicker.appendChild(timeControls);
+
+        if (rangeToggle) {
+            timePicker.insertBefore(rangeToggle, timeControls);
+        }        
         
         // Store references for later use
         this.timePicker = timePicker;
@@ -459,9 +539,6 @@ class LumiCalendar {
         // Last day of the month
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
-        
-        // Last day of previous month
-        const prevMonthLastDay = new Date(year, month, 0).getDate();
         
         const days = [];
         
@@ -567,115 +644,261 @@ class LumiCalendar {
      * Handle date selection
      */
     selectDate(date) {
-        if (this.enableDateTime) {
-            // If we have existing selected value, preserve the time
-            // Otherwise use default time (12:00)
-            let hours = 12;
-            let minutes = 0;
-            if (this.selectedValue) {
-                const selectedDate = new Date(this.selectedValue);
-                if (!isNaN(selectedDate.getTime())) {
-                    hours = selectedDate.getHours();
-                    minutes = selectedDate.getMinutes();
+        if ((this.minDate && date < this.minDate) || this.isDateDisabled(date)) {
+            return; // ignore selection
+        }              
+
+        if (this.rangeSelection) {
+
+            if (!this.startDate || (this.startDate && this.endDate)) {
+                // Start new range
+                this.startDate = date;
+                this.endDate = null;
+                this.activeRangePart = 'start';
+                this.setActiveRangePart('start');
+            } else {
+                // Finish range
+                if (date < this.startDate) {
+                    this.endDate = this.startDate;
+                    this.startDate = date;
+                } else {
+                    this.endDate = date;
                 }
+                this.setActiveRangePart('end');
             }
-            
-            // Set the selected value
-            this.selectedValue = this.formatDateTime(date, hours, minutes);
-            
-            // Update visual selection
-            this.updateSelectedCell(date);
-            
-            // Update internal AM/PM state for 12-hour format
-            if (this.hourFormat === '12') {
-                this.currentIsPM = hours >= 12;
-            }
-            
-            // Show time picker if it exists
-            if (this.timePicker) {
+        
+            this.updateRangeCells();
+        
+            // Show time picker if datetime is enabled
+            if (this.enableDateTime && this.timePicker) {
                 this.timePicker.style.display = 'block';
-                if (this.hoursInput && this.minutesInput) {
-                    // Convert to display format
-                    if (this.hourFormat === '12') {
-                        this.hoursInput.value = this.to12Hour(hours);
-                        // Sync AM/PM dropdown
-                        if (this.ampmSelect) {
-                            this.ampmSelect.value = this.currentIsPM ? 'PM' : 'AM';
-                        }
-                    } else {
-                        this.hoursInput.value = hours;
+                this.syncTimeInputs();
+            }
+
+            // Auto switch to end time after end date selected
+            if (this.endDate && this.enableDateTime) {
+                this.activeRangePart = 'end';
+                this.updateRangeCells();
+            }
+
+            if (this.updateRangeLabels) {
+                this.updateRangeLabels();
+            }            
+        
+            this.triggerChange();
+            return;
+        } else {
+            // Existing single-date selection logic
+            if (this.enableDateTime) {
+                let hours = 12;
+                let minutes = 0;
+                if (this.selectedValue) {
+                    const selectedDate = new Date(this.selectedValue);
+                    if (!isNaN(selectedDate.getTime())) {
+                        hours = selectedDate.getHours();
+                        minutes = selectedDate.getMinutes();
                     }
+                }
+                this.selectedValue = this.formatDateTime(date, hours, minutes);
+                this.updateSelectedCell(date);
+                if (this.hourFormat === '12') this.currentIsPM = hours >= 12;
+                if (this.timePicker) this.timePicker.style.display = 'block';
+                if (this.hoursInput && this.minutesInput) {
+                    if (this.hourFormat === '12') this.hoursInput.value = this.to12Hour(hours);
+                    else this.hoursInput.value = hours;
                     this.minutesInput.value = minutes;
                 }
+                this.triggerChange();
+            } else {
+                this.selectedValue = this.formatDate(date);
+                this.updateSelectedCell(date);
+                this.triggerChange();
             }
-            
-            this.triggerChange();
-        } else {
-            // Date-only mode: select immediately
-            this.selectedValue = this.formatDate(date);
-            
-            // Update visual selection
-            this.updateSelectedCell(date);
-            
-            this.triggerChange();
         }
     }
+
+    syncTimeInputs() {
+        if (!this.enableDateTime) return;
+    
+        let hours, minutes;
+    
+        if (this.rangeSelection) {
+            const time = this.activeRangePart === 'start' ? this.startTime : this.endTime;
+            hours = time.hours;
+            minutes = time.minutes;
+        } else {
+            if (!this.selectedValue) {
+                hours = 12;
+                minutes = 0;
+            } else {
+                const d = new Date(this.selectedValue);
+                if (isNaN(d.getTime())) {
+                    hours = 12;
+                    minutes = 0;
+                } else {
+                    hours = d.getHours();
+                    minutes = d.getMinutes();
+                }
+            }
+        }
+    
+        if (this.hourFormat === '12') {
+            this.hoursInput.value = this.to12Hour(hours);
+            this.currentIsPM = hours >= 12;
+            if (this.ampmSelect) {
+                this.ampmSelect.value = this.currentIsPM ? 'PM' : 'AM';
+            }
+        } else {
+            this.hoursInput.value = hours;
+        }
+    
+        this.minutesInput.value = minutes;
+    }      
+    
+    updateRangeCells() {
+        const allCells = document.querySelectorAll(`${this.target} .day-cell`);
+    
+        allCells.forEach(cell => {
+            cell.classList.remove(
+                'selected',
+                'in-range',
+                'range-start',
+                'range-end',
+                'range-active'
+            );
+        });
+    
+        if (!this.startDate) return;
+    
+        const start = new Date(this.startDate).setHours(0,0,0,0);
+        const end = this.endDate
+            ? new Date(this.endDate).setHours(0,0,0,0)
+            : null;
+    
+        allCells.forEach(cell => {
+            const dateStr = cell.dataset.dateValue;
+            if (!dateStr) return;
+    
+            const cellDate = new Date(dateStr).setHours(0,0,0,0);
+    
+            if (cellDate === start) {
+                cell.classList.add('range-start');
+                if (this.activeRangePart === 'start') {
+                    cell.classList.add('range-active');
+                }
+            }
+    
+            if (end && cellDate === end) {
+                cell.classList.add('range-end');
+                if (this.activeRangePart === 'end') {
+                    cell.classList.add('range-active');
+                }
+            }
+    
+            if (end && cellDate > start && cellDate < end) {
+                cell.classList.add('in-range');
+            }
+        });
+    }
+    
+    /**
+     *  Disable Rand Time 
+     */
+    isDateDisabled(date) {
+        if (!this.disabledRanges || this.disabledRanges.length === 0) return false;
+        
+        const time = date.setHours(0,0,0,0);
+        
+        return this.disabledRanges.some(range => {
+            const start = range.start.setHours(0,0,0,0);
+            const end = range.end.setHours(0,0,0,0);
+            return time >= start && time <= end;
+        });
+    }    
     
     /**
      * Update datetime value when time changes (datetime mode)
      */
     updateDateTime() {
-        if (!this.selectedValue) return;
-        
-        // Get the date part from current selected value
-        const date = new Date(this.selectedValue);
-        if (isNaN(date.getTime())) return;
-        
+        if (!this.enableDateTime) return;
+    
         let hours24;
         const minutes = parseInt(this.minutesInput.value) || 0;
-        
-        // Convert hours based on format
+    
         if (this.hourFormat === '12') {
             const hours12 = parseInt(this.hoursInput.value) || 12;
-            
-            // Validate 12-hour format
             const validHours12 = Math.max(1, Math.min(12, hours12));
             this.hoursInput.value = validHours12;
-            
-            // Convert to 24-hour format using internal AM/PM state
             hours24 = this.to24Hour(validHours12, this.currentIsPM);
         } else {
             const hours = parseInt(this.hoursInput.value) || 0;
-            // Validate 24-hour format
             hours24 = Math.max(0, Math.min(23, hours));
             this.hoursInput.value = hours24;
         }
-        
-        // Validate minutes
+    
         const validMinutes = Math.max(0, Math.min(59, minutes));
         this.minutesInput.value = validMinutes;
-        
-        // Update internal AM/PM state for 12-hour format
-        if (this.hourFormat === '12') {
-            this.currentIsPM = hours24 >= 12;
+    
+        // Save to correct range part or single-date
+        if (this.rangeSelection) {
+            if (this.activeRangePart === 'start') {
+                this.startTime = { hours: hours24, minutes: validMinutes };
+            } else {
+                this.endTime = { hours: hours24, minutes: validMinutes };
+            }
+        } else {
+            // Single date mode
+            if (!this.selectedValue) return; // nothing selected yet
+            const datePart = new Date(this.selectedValue);
+            if (isNaN(datePart.getTime())) return;
+
+            // Update selectedValue with new time
+            this.selectedValue = this.formatDateTime(datePart, hours24, validMinutes);
+
+            // Update the calendar cell highlight if needed
+            this.updateSelectedCell(datePart);
         }
-        
-        // Update selected value with new time (date stays the same)
-        // Always store in 24-hour format internally
-        this.selectedValue = this.formatDateTime(date, hours24, validMinutes);
-        
-        // No need to re-render, just update the value
+    
         this.triggerChange();
-    }
+    }    
     
     /**
      * Trigger onChange callback
      */
     triggerChange() {
         if (this.onChange && typeof this.onChange === 'function') {
-            this.onChange(this.selectedValue);
+            if (this.rangeSelection) {
+
+                let start = null;
+                let end = null;
+            
+                if (this.startDate) {
+                    start = this.enableDateTime
+                        ? this.formatDateTime(
+                            this.startDate,
+                            this.startTime.hours,
+                            this.startTime.minutes
+                        )
+                        : this.formatDate(this.startDate);
+                }
+            
+                if (this.endDate) {
+                    end = this.enableDateTime
+                        ? this.formatDateTime(
+                            this.endDate,
+                            this.endTime.hours,
+                            this.endTime.minutes
+                        )
+                        : this.formatDate(this.endDate);
+                }
+            
+                this.onChange({ start, end });
+                return;
+            } else {
+                this.onChange(this.selectedValue);
+            }
         }
-    }
+    }    
     
     /**
      * Get current selected value
@@ -689,68 +912,112 @@ class LumiCalendar {
      */
     setValue(value) {
         if (!value) {
+            // Clear all selections
             this.selectedValue = null;
-            // Remove selection from all cells
+            this.startDate = null;
+            this.endDate = null;
             const allCells = document.querySelectorAll(`${this.target} .day-cell`);
-            allCells.forEach(cell => {
-                cell.classList.remove('selected');
-            });
-            if (this.timePicker) {
-                this.timePicker.style.display = 'none';
-            }
+            allCells.forEach(cell => cell.classList.remove('selected', 'in-range'));
+            if (this.timePicker) this.timePicker.style.display = 'none';
             return;
         }
-        
-        const date = new Date(value);
-        if (isNaN(date.getTime())) {
-            console.error('Invalid date value');
-            return;
-        }
-        
-        // Check if we need to change the month view
-        const newMonth = date.getMonth();
-        const newYear = date.getFullYear();
-        const currentMonth = this.currentDate.getMonth();
-        const currentYear = this.currentDate.getFullYear();
-        const monthChanged = newMonth !== currentMonth || newYear !== currentYear;
-        
-        // Update current view to show the selected month if needed
-        if (monthChanged) {
-            this.currentDate = new Date(date.getFullYear(), date.getMonth(), 1);
-            this.render(); // Need to re-render if month changed
-        }
-        
-        if (this.enableDateTime) {
-            // DateTime mode
-            const hours24 = date.getHours();
-            const minutes = date.getMinutes();
-            this.selectedValue = this.formatDateTime(date, hours24, minutes);
-            
-            // Update internal AM/PM state for 12-hour format
-            if (this.hourFormat === '12') {
-                this.currentIsPM = hours24 >= 12;
-            }
-            
-            if (this.timePicker) {
-                this.timePicker.style.display = 'block';
-                // Convert to display format
-                if (this.hourFormat === '12') {
-                    this.hoursInput.value = this.to12Hour(hours24);
-                } else {
-                    this.hoursInput.value = hours24;
+    
+        if (this.rangeSelection && typeof value === 'object') {
+            // RESET range first
+            this.startDate = null;
+            this.endDate = null;
+            this.startTime = { hours: 12, minutes: 0 };
+            this.endTime = { hours: 12, minutes: 0 };
+    
+            if (value.start) {
+                const d = new Date(value.start);
+                if (!isNaN(d.getTime())) {
+                    this.startDate = d;
+                    this.startTime = { hours: d.getHours(), minutes: d.getMinutes() };
                 }
-                this.minutesInput.value = minutes;
             }
+    
+            if (value.end) {
+                const d = new Date(value.end);
+                if (!isNaN(d.getTime())) {
+                    this.endDate = d;
+                    this.endTime = { hours: d.getHours(), minutes: d.getMinutes() };
+                }
+            }
+    
+            this.setActiveRangePart(this.endDate ? 'end' : 'start');
+    
+            // Always move calendar to startDate's month/year
+            if (this.startDate) {
+                this.currentDate = new Date(this.startDate.getFullYear(), this.startDate.getMonth(), 1);
+            }
+    
+            this.render();
+            this.updateRangeCells();
+    
+            if (this.enableDateTime && this.timePicker) {
+                this.timePicker.style.display = 'block';
+                this.syncTimeInputs();
+            }
+    
+            this.triggerChange();
+            return;
         } else {
-            // Date-only mode
-            this.selectedValue = this.formatDate(date);
-        }
-        
-        // Update visual selection (only if month didn't change, otherwise render() already did it)
-        if (!monthChanged) {
-            this.updateSelectedCell(date);
+            // SINGLE DATE / DATETIME
+            const date = new Date(value);
+            if (isNaN(date.getTime())) {
+                console.error('Invalid date value');
+                return;
+            }
+    
+            // Move calendar view to selected date's month/year
+            this.currentDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    
+            // Set selected value
+            if (this.enableDateTime) {
+                const hours24 = date.getHours();
+                const minutes = date.getMinutes();
+                this.selectedValue = this.formatDateTime(date, hours24, minutes);
+                if (this.hourFormat === '12') this.currentIsPM = hours24 >= 12;
+            } else {
+                this.selectedValue = this.formatDate(date);
+            }
+    
+            // Render calendar to show selected cell with correct highlight
+            this.render();
+    
+            // Sync time picker if datetime
+            if (this.enableDateTime && this.timePicker) this.syncTimeInputs();
         }
     }
+    
+    /**
+     * Set disabled dates or ranges dynamically
+     * @param {Array} ranges - Array of { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' } objects
+     */
+    setDisabled(ranges) {
+        // Convert string ranges to Date objects
+        this.disabledRanges = (ranges || []).map(range => ({
+            start: new Date(range.start),
+            end: new Date(range.end)
+        }));
+
+        // Re-render calendar to apply disabled styles
+        this.render();
+    }
+
+    
+    setActiveRangePart(part) {
+        this.activeRangePart = part;
+    
+        if (this.rangeStartBtn && this.rangeEndBtn) {
+            this.rangeStartBtn.classList.toggle('active', part === 'start');
+            this.rangeEndBtn.classList.toggle('active', part === 'end');
+        }
+    
+        this.syncTimeInputs();
+        this.updateRangeCells();
+    }    
 }
 
 if (typeof window !== 'undefined') {

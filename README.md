@@ -33,8 +33,18 @@ const calendar = new LumiCalendar({
     dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     monthsNames: ['January', 'February', 'March', 'April', 'May', 'June',
                   'July', 'August', 'September', 'October', 'November', 'December'],
+    rangeSelection: true,
+    initialDate: '2027-02',
+    minDate: '2026-01-01',
+    disabledDates: [
+        { start: '2026-01-10', end: '2026-01-16' },
+        { start: '2026-02-05', end: '2026-02-08' }
+    ],
     onChange: (value) => {
         console.log('Selected value:', value);
+        document.getElementById('date-value').textContent = value && typeof value === 'object'
+        ? `Start: ${value.start}, End: ${value.end}`
+        : value || 'None'; // Update the input field or text content
     }
 });
 ```
@@ -70,7 +80,11 @@ const dateCalendar = new LumiCalendar({
 <script>
 dateCalendar.setValue('2026-01-15');  // YYYY-MM-DD
 // Set value for datetime
-dateCalendar.setValue('2026-01-15 14:30');  // YYYY-MM-DD HH:mm (24-hour)
 // For 12-hour format, it will automatically convert internally and display AM/PM correctly.
+dateCalendar.setValue('2026-01-15 14:30');  // YYYY-MM-DD HH:mm (24-hour)
+//Set date range with date and time
+datetimeCalendar.setValue({ start: '2026-01-11 08:00', end: '2026-01-16 20:00' });
+// Disable the dates in range
+dateCalendar.setDisabled([{ start: '2026-01-20', end: '2026-01-25' }]);
 </script>
 ```
