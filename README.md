@@ -38,7 +38,7 @@ const dateCalendar = new LumiCalendar({
 });
 </script>
 ```
-
+### 2. Include via ES module
 ```javascropt
 import LumiCalendar from './LumiCalendar.js';
 
