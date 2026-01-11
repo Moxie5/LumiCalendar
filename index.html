@@ -183,6 +183,7 @@ datetimeCalendar12.setValue('2024-12-25 14:30');</code></pre>
         const dateCalendar = new LumiCalendar({
             target: '#calendar-date',
             enableDateTime: false,
+            startDay: 1,
             onChange: (value) => {
                 console.log('Selected date:', value);
                 document.getElementById('date-value').textContent = value || 'None';

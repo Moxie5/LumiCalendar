@@ -109,6 +109,10 @@ class LumiCalendar {
         header.appendChild(prevBtn);
         header.appendChild(monthYear);
         header.appendChild(nextBtn);
+
+        // Click to open month/year selector
+        monthYear.style.cursor = 'pointer';
+        monthYear.addEventListener('click', () => this.openMonthYearSelector());
         
         return header;
     }
@@ -185,6 +189,80 @@ class LumiCalendar {
             if (hour12 === 12) return 0;
             return hour12;
         }
+    }
+
+    /**
+     * Open month/year selector popup (polished version)
+     */
+    openMonthYearSelector() {
+        // Remove existing selector if any
+        const existing = document.querySelector(`${this.target} .month-year-selector`);
+        if (existing) existing.remove();
+
+        const container = document.querySelector(this.target);
+        const monthYearDiv = container.querySelector('.month-year');
+
+        const selector = document.createElement('div');
+        selector.className = 'month-year-selector';
+
+        // Month options
+        const monthContainer = document.createElement('div');
+        monthContainer.className = 'month-selector';
+        this.monthsNames.forEach((month, index) => {
+            const monthDiv = document.createElement('div');
+            monthDiv.className = 'month-option';
+            monthDiv.textContent = month;
+            monthDiv.addEventListener('click', () => {
+                this.currentDate.setMonth(index);
+                selector.remove();
+                this.render();
+            });
+            monthContainer.appendChild(monthDiv);
+        });
+
+        // Year options (currentYear ± 10)
+        const yearContainer = document.createElement('div');
+        yearContainer.className = 'year-selector';
+        // Year options (10 years before and after current real year)
+        const now = new Date();
+        const startYear = now.getFullYear() - 10;
+        const endYear = now.getFullYear() + 10;
+
+        for (let y = startYear; y <= endYear; y++) {
+            const yearDiv = document.createElement('div');
+            yearDiv.className = 'year-option';
+            yearDiv.textContent = y;
+            yearDiv.addEventListener('click', () => {
+                this.currentDate.setFullYear(y);
+                selector.remove();
+                this.render();
+            });
+            yearContainer.appendChild(yearDiv);
+        }
+
+
+        selector.appendChild(monthContainer);
+        selector.appendChild(yearContainer);
+
+        // Append to container
+        container.appendChild(selector);
+
+        // Position the popup below the month-year div
+        const rect = monthYearDiv.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        selector.style.top = `${monthYearDiv.offsetTop + monthYearDiv.offsetHeight}px`;
+        selector.style.left = `${monthYearDiv.offsetLeft}px`;
+
+        // Close when clicking outside
+        const outsideClickListener = (e) => {
+            if (!selector.contains(e.target) && e.target !== monthYearDiv) {
+                selector.remove();
+                document.removeEventListener('click', outsideClickListener);
+            }
+        };
+        setTimeout(() => { // slight delay to avoid immediate removal on click
+            document.addEventListener('click', outsideClickListener);
+        }, 0);
     }
     
     /**
@@ -573,9 +651,9 @@ class LumiCalendar {
         }
     }
 }
-    
+
 if (typeof window !== 'undefined') {
     window.LumiCalendar = LumiCalendar;
 }
 
-export default LumiCalendar;
+// export default LumiCalendar;

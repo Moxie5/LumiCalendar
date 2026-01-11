@@ -12,6 +12,7 @@
 - Supports programmatic setting and getting of selected date
 - Simple navigation between months
 - Highlights today’s date and selected date
+- Click the month/year header to open a popup where you can easily select a month or year.
 
 ---
 
@@ -48,8 +49,13 @@ const calendar = new LumiCalendar({
 
 <script>
 const dateCalendar = new LumiCalendar({
-    target: '#calendar-date',
-    enableDateTime: false,
+    target: '#calendar',        // Selector for the container element
+    enableDateTime: true,       // Enable date + time selection
+    hourFormat: '12',           // '12' or '24'
+    startDay: 1,                // 0 = Sunday, 1 = Monday
+    dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    monthsNames: ['January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'],
     onChange: (value) => {
         console.log('Selected date:', value);
         document.getElementById('date-value').textContent = value || 'None';
