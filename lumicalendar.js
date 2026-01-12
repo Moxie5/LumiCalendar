@@ -904,8 +904,23 @@ class LumiCalendar {
      * Get current selected value
      */
     getValue() {
-        return this.selectedValue;
-    }
+        if (this.rangeSelection) {
+            return {
+                start: this.startDate
+                    ? this.enableDateTime
+                        ? this.formatDateTime(this.startDate, this.startTime.hours, this.startTime.minutes)
+                        : this.formatDate(this.startDate)
+                    : null,
+                end: this.endDate
+                    ? this.enableDateTime
+                        ? this.formatDateTime(this.endDate, this.endTime.hours, this.endTime.minutes)
+                        : this.formatDate(this.endDate)
+                    : null
+            };
+        } else {
+            return this.selectedValue;
+        }
+    }    
     
     /**
      * Set calendar value programmatically
