@@ -1019,30 +1019,3 @@ class LumiCalendar {
         this.updateRangeCells();
     }    
 }
-
-if (typeof window !== 'undefined') {
-    window.LumiCalendar = LumiCalendar;
-}
-
-// export default LumiCalendar;
-
-// (function (global, factory) {
-//     if (typeof module === "object" && typeof module.exports === "object") {
-//         // Node/CommonJS or bundler environment
-//         module.exports = factory();
-//     } else if (typeof define === "function" && define.amd) {
-//         // AMD
-//         define([], factory);
-//     } else {
-//         // Browser global
-//         global.LumiCalendar = factory();
-//     }
-// }(typeof window !== "undefined" ? window : this, function () {
-
-//     // Your full LumiCalendar class code goes here
-//     class LumiCalendar {
-//         // ...everything inside your class...
-//     }
-
-//     return LumiCalendar;
-// }));

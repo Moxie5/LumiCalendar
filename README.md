@@ -1,6 +1,6 @@
 # LumiCalendar
 
-**LumiCalendar** is a simple, dependency-free JavaScript calendar component that supports both **date-only** and **datetime** selection modes. It is lightweight, fully customizable, and easy to integrate.
+**LumiCalendar** is a lightweight, dependency-free JavaScript calendar component built by students as a learning project. It provides a fully functional, easy-to-use calendar that can be integrated into any web project. Features include:
 
 ---
 
@@ -31,7 +31,7 @@
 
 ## Installation
 
-You can include LumiCalendar via ES module import or via script tag.
+You can include LumiCalendar via script tag.
 
 ### 1. Include via `<script>` tag (browser usage)
 
