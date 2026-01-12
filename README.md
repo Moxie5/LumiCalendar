@@ -37,10 +37,6 @@ You can include LumiCalendar via ES module import or via script tag.
 
 ```html
 <script src="LumiCalendar.js"></script>
-
-<div id="calendar-date"></div>
-<p>Selected date: <span id="date-value">None</span></p>
-
 <script>
 /* --------------------------------------------------
        1. Date Only (Base)
