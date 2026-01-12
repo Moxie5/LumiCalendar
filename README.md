@@ -6,14 +6,27 @@
 
 ## Features
 
-- Date-only or datetime selection
-- 12-hour or 24-hour time format
-- Customizable day names and month names
-- Supports programmatic setting and getting of selected date
+- Date-only selection
+- DateTime selection
+- 12-hour time format
+- 24-hour time format
+- Customizable day names
+- Customizable month names
+- Supports programmatic setting of date/datetime
+- Supports programmatic getting of date/datetime via getValue()
 - Simple navigation between months
-- Highlights today’s date and selected date
-- Click the month/year header to open a popup where you can easily select a month or year.
-
+- Month/year header popup for easy selection
+- Highlights today’s date
+- Highlights the selected date
+- Allows selecting a date range (start and end dates)
+- Allows selecting a datetime range (start and end with time)
+- Prevents selecting dates before a minimum date (minDate)
+- Prevents selecting disabled dates (setDisabled())
+- Adjustable hour and minute inputs
+- Adjustable AM/PM selection for 12-hour format
+- Displays range selection visually on calendar
+- Supports initial date display (initialDate)
+- Works with single date, datetime, date range, or datetime range
 ---
 
 ## Installation
