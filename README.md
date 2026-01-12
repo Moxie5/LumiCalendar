@@ -1,6 +1,6 @@
 # LumiCalendar
 
-**LumiCalendar** is a lightweight, dependency-free JavaScript calendar component built by students as a learning project. It provides a fully functional, easy-to-use calendar that can be integrated into any web project. Features include:
+**LumiCalendar** is a lightweight, dependency-free JavaScript calendar component built by student as a learning project. It provides a fully functional, easy-to-use calendar that can be integrated into any web project. Features include:
 
 ---
 
