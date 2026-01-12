@@ -244,13 +244,13 @@ You can include LumiCalendar via script tag.
 
 ```html
 <script>
-dateCalendar.setValue('2026-01-15');  // YYYY-MM-DD
+cal1.setValue('2026-01-15');  // YYYY-MM-DD
 // Set value for datetime
 // For 12-hour format, it will automatically convert internally and display AM/PM correctly.
-dateCalendar.setValue('2026-01-15 14:30');  // YYYY-MM-DD HH:mm (24-hour)
+cal5.setValue('2026-01-15 14:30');  // YYYY-MM-DD HH:mm (24-hour)
 //Set date range with date and time
-datetimeCalendar.setValue({ start: '2026-01-11 08:00', end: '2026-01-16 20:00' });
+cal7.setValue({ start: '2026-01-11 08:00', end: '2026-01-16 20:00' });
 // Disable the dates in range
-dateCalendar.setDisabled([{ start: '2026-01-20', end: '2026-01-25' }]);
+cal4.setDisabled([{ start: '2026-01-20', end: '2026-01-25' }]);
 </script>
 ```
