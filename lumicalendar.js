@@ -116,25 +116,6 @@ class LumiCalendar {
         // Year selector
         const yearControl = document.createElement('div');
         yearControl.className = 'year-control';
-    
-        // const prev = document.createElement('button');
-        // prev.textContent = '−';
-        // prev.onclick = () => {
-        //     this.tempDate.setFullYear(this.tempDate.getFullYear() - 1);
-        //     yearLabel.textContent = this.tempDate.getFullYear();
-        // };        
-    
-        // const yearLabel = document.createElement('span');
-        // yearLabel.textContent = this.tempDate.getFullYear();
-    
-        // const next = document.createElement('button');
-        // next.textContent = '+';
-        // next.onclick = () => {
-        //     this.tempDate.setFullYear(this.tempDate.getFullYear() + 1);
-        //     yearLabel.textContent = this.tempDate.getFullYear();
-        // };        
-    
-        // yearControl.append(prev, yearLabel, next);
 
         // Scrollable year container
         const yearContainer = document.createElement('div');
