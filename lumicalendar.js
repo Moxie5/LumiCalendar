@@ -18,6 +18,10 @@ class LumiCalendar {
         })();              
         this.monthsNames = config.monthsNames || ['January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'];
+        this.applyButtonText = config.applyButtonText || 'Apply';
+        this.cancelButtonText = config.cancelButtonText || 'Cancel';
+        this.hourLabel = config.hourLabel || 'Hour:';
+        this.minuteLabel = config.minuteLabel || 'Minute:';
         // Selected value (date or datetime)
         this.selectedValue = null;
         // Range selection properties
@@ -207,14 +211,14 @@ class LumiCalendar {
         actions.className = 'month-year-actions';
     
         const cancel = document.createElement('button');
-        cancel.textContent = 'Cancel';
+        cancel.textContent = this.cancelButtonText;
         cancel.onclick = () => {
             this.viewMode = 'days';
             this.render();
         };
     
         const apply = document.createElement('button');
-        apply.textContent = 'Apply';
+        apply.textContent = this.applyButtonText;
         apply.onclick = () => {
             this.currentDate = new Date(this.tempDate);
             this.viewMode = 'days';
@@ -293,41 +297,36 @@ class LumiCalendar {
         
         days.forEach(day => {        
             const dayCell = document.createElement('div');
-            dayCell.className = 'day-cell';
-
-            if (day) {
-                // Disabled check
-                if ((this.minDate && day < this.minDate) || this.isDateDisabled(day)) {
-                    dayCell.classList.add('disabled');
-                    dayCell.style.pointerEvents = 'none';
-                    dayCell.style.opacity = '0.4';
-                } else {
-                    dayCell.addEventListener('click', () => this.selectDate(day));
-                }
-            }                      
+            dayCell.className = 'day-cell';                    
             
             if (day === null) {
-                // Empty cell for days outside current month
                 dayCell.className += ' empty';
             } else {
                 dayCell.textContent = day.getDate();
-                
-                // Store date value for easy updates
                 dayCell.dataset.dateValue = this.formatDate(day);
-                
-                // Selection is handled exclusively by updateRangeCells()
+            
+                const isDisabled =
+                    (this.minDate && day < this.minDate) ||
+                    this.isDateDisabled(day);
+            
+                if (isDisabled) {
+                    dayCell.classList.add('disabled');
+                    dayCell.style.pointerEvents = 'none';
+                    dayCell.style.opacity = '0.4';
+                    return grid.appendChild(dayCell);
+                }
+            
                 if (!this.rangeSelection && this.isSelected(day)) {
                     dayCell.classList.add('selected');
                 }
-                
-                // Check if this day is today
+            
                 if (this.isToday(day)) {
-                    dayCell.className += ' today';
+                    dayCell.classList.add('today');
                 }
-                
-                // Add click handler
+            
+                // ✅ CLICK ONLY FOR ENABLED DATES
                 dayCell.addEventListener('click', () => this.selectDate(day));
-            }
+            }            
             
             grid.appendChild(dayCell);
         });
@@ -438,7 +437,7 @@ class LumiCalendar {
         const hoursWrapper = document.createElement('div');
         hoursWrapper.className = 'time-input-wrapper';
         const hoursLabel = document.createElement('label');
-        hoursLabel.textContent = 'Hour:';
+        hoursLabel.textContent = this.hourLabel;
         const hoursInput = document.createElement('input');
         hoursInput.type = 'number';
         hoursInput.className = 'time-input hours-input';
@@ -461,7 +460,7 @@ class LumiCalendar {
         const minutesWrapper = document.createElement('div');
         minutesWrapper.className = 'time-input-wrapper';
         const minutesLabel = document.createElement('label');
-        minutesLabel.textContent = 'Minute:';
+        minutesLabel.textContent = this.minuteLabel;
         const minutesInput = document.createElement('input');
         minutesInput.type = 'number';
         minutesInput.className = 'time-input minutes-input';
@@ -685,6 +684,7 @@ class LumiCalendar {
                 this.updateRangeLabels();
             }            
         
+            this.selectedValue = true;
             this.triggerChange();
             return;
         } else {
@@ -807,11 +807,11 @@ class LumiCalendar {
     isDateDisabled(date) {
         if (!this.disabledRanges || this.disabledRanges.length === 0) return false;
         
-        const time = date.setHours(0,0,0,0);
+        const time = new Date(date).setHours(0,0,0,0);
         
         return this.disabledRanges.some(range => {
-            const start = range.start.setHours(0,0,0,0);
-            const end = range.end.setHours(0,0,0,0);
+            const start = new Date(range.start).setHours(0,0,0,0);
+            const end = new Date(range.end).setHours(0,0,0,0);
             return time >= start && time <= end;
         });
     }    
