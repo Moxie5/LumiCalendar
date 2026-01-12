@@ -20,36 +20,7 @@
 
 You can include LumiCalendar via ES module import or via script tag.
 
-### 1. Using ES Module
-
-```javascript
-import LumiCalendar from './path/to/LumiCalendar.js';
-
-const calendar = new LumiCalendar({
-    target: '#calendar',        // Selector for the container element
-    enableDateTime: true,       // Enable date + time selection
-    hourFormat: '12',           // '12' or '24'
-    startDay: 1,                // 0 = Sunday, 1 = Monday
-    dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
-    monthsNames: ['January', 'February', 'March', 'April', 'May', 'June',
-                  'July', 'August', 'September', 'October', 'November', 'December'],
-    rangeSelection: true,
-    initialDate: '2027-02',
-    minDate: '2026-01-01',
-    disabledDates: [
-        { start: '2026-01-10', end: '2026-01-16' },
-        { start: '2026-02-05', end: '2026-02-08' }
-    ],
-    onChange: (value) => {
-        console.log('Selected value:', value);
-        document.getElementById('date-value').textContent = value && typeof value === 'object'
-        ? `Start: ${value.start}, End: ${value.end}`
-        : value || 'None'; // Update the input field or text content
-    }
-});
-```
-
-### 2. Include via `<script>` tag (browser usage)
+### 1. Include via `<script>` tag (browser usage)
 
 ```html
 <script src="LumiCalendar.js"></script>
@@ -58,23 +29,209 @@ const calendar = new LumiCalendar({
 <p>Selected date: <span id="date-value">None</span></p>
 
 <script>
-const dateCalendar = new LumiCalendar({
-    target: '#calendar',        // Selector for the container element
-    enableDateTime: true,       // Enable date + time selection
-    hourFormat: '12',           // '12' or '24'
-    startDay: 1,                // 0 = Sunday, 1 = Monday
-    dayNames: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
-    monthsNames: ['January', 'February', 'March', 'April', 'May', 'June',
-                  'July', 'August', 'September', 'October', 'November', 'December'],
-    onChange: (value) => {
-        console.log('Selected date:', value);
-        document.getElementById('date-value').textContent = value || 'None';
-    }
-});
+/* --------------------------------------------------
+       1. Date Only (Base)
+    -------------------------------------------------- */
+    const cal1 = new LumiCalendar({
+        target: '#cal-1',
+        enableDateTime: false,
+        onChange: (value) => {
+            document.getElementById('v1').textContent = value || 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       2. Date Only (Monday Start)
+    -------------------------------------------------- */
+    const cal2 = new LumiCalendar({
+        target: '#cal-2',
+        enableDateTime: false,
+        startDay: 1,
+        onChange: (value) => {
+            document.getElementById('v2').textContent = value || 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       3. Date Only (Min Date)
+    -------------------------------------------------- */
+    const cal3 = new LumiCalendar({
+        target: '#cal-3',
+        enableDateTime: false,
+        minDate: '2026-01-01',
+        onChange: (value) => {
+            document.getElementById('v3').textContent = value || 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       4. Disabled Ranges
+    -------------------------------------------------- */
+    const cal4 = new LumiCalendar({
+        target: '#cal-4',
+        enableDateTime: false,
+        disabledDates: [
+            { start: '2026-01-10', end: '2026-01-15' }
+        ],
+        onChange: (value) => {
+            document.getElementById('v4').textContent = value || 'None';
+        }
+    });
+
+    // OR Other way to set disabled dates
+    // cal4.setDisabled([
+    //     { start: '2026-01-10', end: '2026-01-15' }
+    // ]);
+
+    /* --------------------------------------------------
+       5. DateTime (24h)
+    -------------------------------------------------- */
+    const cal5 = new LumiCalendar({
+        target: '#cal-5',
+        enableDateTime: true,
+        hourFormat: '24',
+        onChange: (value) => {
+            document.getElementById('v5').textContent = value || 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       6. DateTime (12h)
+    -------------------------------------------------- */
+    const cal6 = new LumiCalendar({
+        target: '#cal-6',
+        enableDateTime: true,
+        hourFormat: '12',
+        onChange: (value) => {
+            document.getElementById('v6').textContent = value || 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       7. Date Range (Date Only)
+    -------------------------------------------------- */
+    const cal7 = new LumiCalendar({
+        target: '#cal-7',
+        rangeSelection: true,
+        enableDateTime: false,
+        onChange: (value) => {
+            document.getElementById('v7').textContent =
+                value ? `Start: ${value.start}, End: ${value.end}` : 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       8. Date Range (Preset)
+    -------------------------------------------------- */
+    const cal8 = new LumiCalendar({
+        target: '#cal-8',
+        rangeSelection: true,
+        enableDateTime: false,
+        onChange: (value) => {
+            document.getElementById('v8').textContent =
+                value ? `Start: ${value.start}, End: ${value.end}` : 'None';
+        }
+    });
+    cal8.setValue({ start: '2026-01-05', end: '2026-01-10' });
+
+    /* --------------------------------------------------
+       9. DateTime Range (24h)
+    -------------------------------------------------- */
+    const cal9 = new LumiCalendar({
+        target: '#cal-9',
+        rangeSelection: true,
+        enableDateTime: true,
+        hourFormat: '24',
+        onChange: (value) => {
+            document.getElementById('v9').textContent =
+                value ? `Start: ${value.start}, End: ${value.end}` : 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       10. DateTime Range (12h)
+    -------------------------------------------------- */
+    const cal10 = new LumiCalendar({
+        target: '#cal-10',
+        rangeSelection: true,
+        enableDateTime: true,
+        hourFormat: '12',
+        onChange: (value) => {
+            document.getElementById('v10').textContent =
+                value ? `Start: ${value.start}, End: ${value.end}` : 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       11. Localized (BG)
+    -------------------------------------------------- */
+    const cal11 = new LumiCalendar({
+        target: '#cal-11',
+        enableDateTime: true,
+        startDay: 1,
+        dayNames: ['Нед', 'Пон', 'Втор', 'Сря', 'Чет', 'Пет', 'Съб'],
+        monthsNames: [
+            'Януари','Февруари','Март','Април','Май','Юни',
+            'Юли','Август','Септември','Октомври','Ноември','Декември'
+        ],
+        cancelButtonText: 'Отказ',
+        applyButtonText: 'Запази',
+        hourLabel: 'Час:',
+        minuteLabel: 'Минути:',
+        onChange: (value) => {
+            document.getElementById('v11').textContent = value || 'None';
+        }
+    });
+
+    /* --------------------------------------------------
+       12. Programmatic Date
+    -------------------------------------------------- */
+    const cal12 = new LumiCalendar({
+        target: '#cal-12',
+        enableDateTime: false,
+        onChange: (value) => {
+            document.getElementById('v12').textContent = value || 'None';
+        }
+    });
+    cal12.setValue('2026-02-14');
+
+    /* --------------------------------------------------
+       13. Programmatic DateTime Range
+    -------------------------------------------------- */
+    const cal13 = new LumiCalendar({
+        target: '#cal-13',
+        rangeSelection: true,
+        enableDateTime: true,
+        onChange: (value) => {
+            document.getElementById('v13').textContent =
+                value ? `Start: ${value.start}, End: ${value.end}` : 'None';
+        }
+    });
+    cal13.setValue({
+        start: '2026-03-01 09:00',
+        end: '2026-03-03 18:00'
+    });
+
+    /* --------------------------------------------------
+       14. Booking Style
+    -------------------------------------------------- */
+    const cal14 = new LumiCalendar({
+        target: '#cal-14',
+        rangeSelection: true,
+        enableDateTime: true,
+        minDate: '2026-01-01',
+        disabledDates: [
+            { start: '2026-01-10', end: '2026-01-12' }
+        ],
+        onChange: (value) => {
+            document.getElementById('v14').textContent =
+                value ? `Start: ${value.start}, End: ${value.end}` : 'None';
+        }
+    });
 </script>
 ```
 
-### 3. Set a value
+### 2. Set a value
 
 ```html
 <script>
